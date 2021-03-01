@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 
 import AppBar from "@material-ui/core/AppBar";
 import Menu from "@material-ui/core/Menu";
@@ -8,15 +8,19 @@ import Tooltip from "@material-ui/core/Tooltip";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import SettingsIcon from "@material-ui/icons/Settings";
-import Brightness3Icon from "@material-ui/icons/Brightness3";
-import WbSunnyIcon from "@material-ui/icons/WbSunny";
+import Brightness4Icon from "@material-ui/icons/Brightness4";
+import Brightness7Icon from "@material-ui/icons/Brightness7";
+import VolumeOffIcon from "@material-ui/icons/VolumeOff";
+import VolumeUpIcon from "@material-ui/icons/VolumeUp";
 
 import firebase from "../firebase";
-import { UserContext } from "../context";
+import { UserContext, SettingsContext } from "../context";
 import User from "./User";
 import InternalLink from "./InternalLink";
 import PromptDialog from "./PromptDialog";
+import UserColorDialog from "./UserColorDialog";
 import ColorChoiceDialog from "./ColorChoiceDialog";
+import KeyboardLayoutDialog from "./KeyboardLayoutDialog";
 import AccountOptionsDialog from "./AccountOptionsDialog";
 
 function Navbar({
@@ -26,9 +30,12 @@ function Navbar({
   handleCustomColors,
 }) {
   const user = useContext(UserContext);
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const settings = useContext(SettingsContext);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [changeName, setChangeName] = useState(false);
-  const [changeColors, setChangeColors] = useState(false);
+  const [changeUserColor, setChangeUserColor] = useState(false);
+  const [changeCardColors, setChangeCardColors] = useState(false);
+  const [changeKeyboardLayout, setChangeKeyboardLayout] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
 
   function handleMenu(event) {
@@ -41,17 +48,22 @@ function Navbar({
 
   function handleChangeName(name) {
     setChangeName(false);
+    name = name.trim();
     if (name) {
       firebase.database().ref(`users/${user.id}/name`).set(name);
     }
   }
 
-  function handleChangeColors(colorMap) {
-    setChangeColors(false);
+  function handleChangeCardColors(colorMap) {
+    setChangeCardColors(false);
     if (colorMap) {
       customColors[themeType] = colorMap;
       handleCustomColors(customColors);
     }
+  }
+
+  function handleChangeVolume() {
+    settings.setVolume((volume) => (volume === "on" ? "off" : "on"));
   }
 
   return (
@@ -78,14 +90,25 @@ function Navbar({
             />
           </InternalLink>
         </Typography>
+        <IconButton color="inherit" onClick={handleChangeVolume}>
+          {settings.volume === "on" ? (
+            <Tooltip title="Mute">
+              <VolumeUpIcon />
+            </Tooltip>
+          ) : (
+            <Tooltip title="Unmute">
+              <VolumeOffIcon />
+            </Tooltip>
+          )}
+        </IconButton>
         <IconButton color="inherit" onClick={handleChangeTheme}>
           {themeType === "light" ? (
             <Tooltip title="Dark theme">
-              <Brightness3Icon />
+              <Brightness4Icon />
             </Tooltip>
           ) : (
             <Tooltip title="Light theme">
-              <WbSunnyIcon />
+              <Brightness7Icon />
             </Tooltip>
           )}
         </IconButton>
@@ -119,11 +142,27 @@ function Navbar({
           </MenuItem>
           <MenuItem
             onClick={() => {
-              setChangeColors(true);
+              setChangeUserColor(true);
               handleCloseMenu();
             }}
           >
-            Change colors
+            Change user color
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setChangeCardColors(true);
+              handleCloseMenu();
+            }}
+          >
+            Change card colors
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setChangeKeyboardLayout(true);
+              handleCloseMenu();
+            }}
+          >
+            Change keyboard layout
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -142,11 +181,20 @@ function Navbar({
           label="Name"
           maxLength={25}
         />
+        <UserColorDialog
+          open={changeUserColor}
+          onClose={() => setChangeUserColor(false)}
+          title="Change User Color"
+        />
         <ColorChoiceDialog
-          open={changeColors}
-          onClose={handleChangeColors}
-          title="Change Colors"
-          key={themeType}
+          open={changeCardColors}
+          onClose={handleChangeCardColors}
+          title="Change Card Colors"
+        />
+        <KeyboardLayoutDialog
+          open={changeKeyboardLayout}
+          onClose={() => setChangeKeyboardLayout(false)}
+          title="Change Keyboard Layout"
         />
         <AccountOptionsDialog
           open={showOptions}

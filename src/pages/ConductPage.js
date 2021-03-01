@@ -1,5 +1,3 @@
-import React from "react";
-
 import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 import Container from "@material-ui/core/Container";
@@ -57,9 +55,24 @@ function ConductPage() {
             </li>
             <li>
               Remember that you share the public chat with many others. It is a
-              good place to find people, but if you want to have longer,
-              drawn-out conversations, you are encouraged to do so in private
-              messages.
+              good place to find people, but if you want to have one-on-one
+              conversations or small talk, you are encouraged to do so in game
+              chat rooms.
+            </li>
+            <li>
+              A public chat is not a good place to post any personal
+              information; neither here, nor on other websites on the internet.
+              Please make sure you only share personal information in private
+              with people you know and trust.
+            </li>
+            <li>
+              Only links to games on this site are appropriate in the public
+              chat. Links to any other website should be shared in private.
+            </li>
+            <li>
+              Do not use computer-aided tools (i.e., bots) for finding sets
+              except in private rooms, with other players who specifically agree
+              to it.
             </li>
             <li>
               Content is moderated at our discretion; this applies both to the
@@ -80,7 +93,11 @@ function ConductPage() {
           and contact a moderator.
         </Typography>
       </Paper>
-      <Typography variant="body1" align="center" style={{ margin: 12 }}>
+      <Typography
+        variant="body1"
+        align="center"
+        style={{ marginTop: 12, paddingBottom: 12 }}
+      >
         <InternalLink to="/">Return to home</InternalLink>
       </Typography>
     </Container>

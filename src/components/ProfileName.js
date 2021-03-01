@@ -1,4 +1,4 @@
-import React, { memo, useContext } from "react";
+import { useState, memo, useContext } from "react";
 
 import Typography from "@material-ui/core/Typography";
 import { useTheme } from "@material-ui/core/styles";
@@ -34,7 +34,7 @@ function ProfileName({ userId }) {
   const user = useContext(UserContext);
   const classes = useStyles();
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClickVertIcon = (event) => {
     setAnchorEl(event.currentTarget);
@@ -43,6 +43,15 @@ function ProfileName({ userId }) {
   const handleResetName = () => {
     firebase.database().ref(`users/${userId}/name`).set(generateName());
     handleClose();
+  };
+
+  const handleBan = (minutes) => {
+    const endTime = Date.now() + minutes * 60000;
+    firebase.database().ref(`users/${userId}/banned`).set(endTime);
+  };
+
+  const handleUnban = () => {
+    firebase.database().ref(`users/${userId}/banned`).remove();
   };
 
   const handleClose = () => {
@@ -79,8 +88,29 @@ function ProfileName({ userId }) {
                 onClose={handleClose}
               >
                 <MenuItem onClick={handleResetName}>Reset username</MenuItem>
+                {player.banned && Date.now() < player.banned ? (
+                  <MenuItem onClick={() => handleUnban()}>Unban</MenuItem>
+                ) : (
+                  [
+                    <MenuItem key={1} onClick={() => handleBan(30)}>
+                      Ban for 30 minutes
+                    </MenuItem>,
+                    <MenuItem key={2} onClick={() => handleBan(24 * 60)}>
+                      Ban for 1 day
+                    </MenuItem>,
+                    <MenuItem key={3} onClick={() => handleBan(7 * 24 * 60)}>
+                      Ban for 1 week
+                    </MenuItem>,
+                  ]
+                )}
               </Menu>
             </div>
+
+            {player.admin && (
+              <Typography variant="subtitle2" gutterBottom>
+                Moderator
+              </Typography>
+            )}
 
             <Typography variant="body2" gutterBottom>
               Last seen:{" "}
