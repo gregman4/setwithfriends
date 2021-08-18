@@ -23,8 +23,9 @@ Code for the frontend is written in JavaScript and located in the `src/` folder,
 while serverless functions are written in TypeScript and located in the
 `functions/` folder.
 
-The production site is built and hosted on Netlify from the `master` branch. The
-latest development version of the code is in the `develop` branch.
+The latest development version of the code is on the `main` branch. We use
+GitHub Actions to automate our build and deployment process on Netlify, after a
+new release is created with version number `vA.B.C`.
 
 ## Contributing
 
@@ -36,25 +37,39 @@ chat!
 
 To build the site for development:
 
-- Install Node.js and npm
-- Run `npm install` in the root folder
-- Run `npm start` - it should now open the site in your browser
+- Install Node.js 14 and npm 7.
+- Run `npm install -g firebase-tools` to globally install the Firebase CLI.
+- Run `npm install` in the root folder to get dependencies.
+- Run `npm install` in the `functions` folder.
+- To start the project, run `npm run dev`. This runs a script, which is
+  responsible for doing several things concurrently:
+  - Build the TypeScript cloud functions in watch mode.
+  - Start the Firebase Local Emulator Suite.
+  - Start the frontend with React Fast Refresh enabled.
 
-Please make all pull requests with new features or bugfixes to the `develop`
+You should also be able to access the Emulator UI at `http://localhost:4000`,
+which contains useful information and allows you to inspect/modify the database
+during development. Changes to client code in `src` should be immediately
+visible, as well as changes to code in `functions`.
+
+Please make all pull requests with new features or bugfixes to the `main`
 branch. We are formatting code using [Prettier](https://prettier.io/), so you
 should run `npm run format` on your code before making a pull request.
 
 ## Deployment
 
-As mentioned above, the latest changes to the `master` branch are deployed
+As mentioned above, the latest changes to the `main` branch are deployed
 automatically to Netlify using the `npm run build` script. If you try to run
 this locally, it will not work due to protections on the production database.
-Instead, you can preview a release build with development configuration using
-the `npm run build:dev` script.
+Instead, you can preview a release build configured to connect to the local
+emulator suite using the `npm run build:dev` script.
 
 The other parts of the app (serverless functions, database rules) are deployed
-to production using GitHub Actions on the master branch. They must be manually
-deployed to the development environment using the Firebase CLI.
+to production using GitHub Actions on the `main` branch. The
+[staging environment](https://setwithfriends-dev.web.app/) gets automatic deploy
+previews when CI on the `main` branch passes. It is useful for seeing the latest
+version of the app and making sure that nothing is broken before releasing to
+production.
 
 ## License
 

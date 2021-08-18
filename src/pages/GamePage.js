@@ -20,7 +20,7 @@ import Loading from "../components/Loading";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
 import GameSidebar from "../components/GameSidebar";
-import GameChat from "../components/GameChat";
+import Chat from "../components/Chat";
 import DonateDialog from "../components/DonateDialog";
 import { SettingsContext, UserContext } from "../context";
 import {
@@ -279,7 +279,7 @@ function GamePage({ match }) {
               setSnack({
                 open: true,
                 variant: "error",
-                message: "At least one card should be from the previous set!",
+                message: "One card must be from the previous set!",
               });
             } else if (checkSet(...vals)) {
               handleSet(vals);
@@ -294,7 +294,7 @@ function GamePage({ match }) {
               setSnack({
                 open: true,
                 variant: "error",
-                message: "Not a set!",
+                message: "Not a set chain!",
               });
             }
             return [];
@@ -376,7 +376,9 @@ function GamePage({ match }) {
         <Box clone order={{ xs: 3, sm: 1 }}>
           <Grid item xs={12} sm={4} md={3} className={classes.sideColumn}>
             <Paper style={{ display: "flex", height: "100%", padding: 8 }}>
-              <GameChat
+              <Chat
+                title="Game Chat"
+                messageLimit={200}
                 gameId={gameId}
                 history={history}
                 startedAt={game.startedAt}

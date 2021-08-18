@@ -9,7 +9,7 @@ interface GameEvent {
   c4?: string;
 }
 
-type GameMode = "normal" | "setchain" | "ultraset";
+export type GameMode = "normal" | "setchain" | "ultraset";
 
 /** Generates a random 81-card deck using a Fisher-Yates shuffle. */
 export function generateDeck() {
@@ -107,7 +107,7 @@ function deleteCards(deck: Set<string>, cards: string[]) {
   for (const c of cards) deck.delete(c);
 }
 
-/** Replay game event for normal mode*/
+/** Replay game event for normal mode */
 function replayEventNormal(deck: Set<string>, event: GameEvent) {
   const cards = [event.c1, event.c2, event.c3];
   if (!isValid(deck, cards)) return false;
@@ -123,11 +123,11 @@ function replayEventChain(
 ) {
   const { c1, c2, c3 } = event;
 
-  //Check validity
+  // Check validity
   let ok = c1 !== c2 && c2 !== c3 && c1 !== c3;
   ok &&= deck.has(c2) && deck.has(c3);
   if (history.length) {
-    //One card (c1) should be taken from the previous set
+    // One card (c1) should be taken from the previous set
     const prevEvent = history[history.length - 1];
     const prev = [prevEvent.c1, prevEvent.c2, prevEvent.c3];
     ok &&= prev.includes(c1);
@@ -139,7 +139,7 @@ function replayEventChain(
   return true;
 }
 
-/** Replay game event for ultraset mode*/
+/** Replay game event for ultraset mode */
 function replayEventUltra(deck: Set<string>, event: GameEvent) {
   const cards = [event.c1, event.c2, event.c3, event.c4!];
   if (!isValid(deck, cards)) return false;
@@ -164,6 +164,7 @@ export function replayEvents(
 
   const deck: Set<string> = new Set(gameData.child("deck").val());
   const history: GameEvent[] = [];
+  const scores: Record<string, number> = {};
   let finalTime = 0;
   for (const event of events) {
     let eventValid = false;
@@ -175,6 +176,7 @@ export function replayEvents(
       eventValid = true;
     if (eventValid) {
       history.push(event);
+      scores[event.user] = (scores[event.user] ?? 0) + 1;
       finalTime = event.time;
     }
   }
@@ -185,5 +187,5 @@ export function replayEvents(
     lastSet = [lastEvent.c1, lastEvent.c2, lastEvent.c3];
   }
 
-  return { lastSet, deck, finalTime };
+  return { lastSet, deck, finalTime, scores };
 }

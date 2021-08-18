@@ -1,9 +1,6 @@
 [context.production]
   command = "npm run build"
 
-[context.deploy-preview]
-  command = "npm run build:dev"
-
 [[redirects]]
   from = "https://setwithfriends.netlify.app/*"
   to = "https://setwithfriends.com/:splat"
@@ -13,6 +10,11 @@
 [[redirects]]
   from = "/__/auth/*"
   to = "https://setwithfriends.web.app/__/auth/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/arc-sw.js"
+  to = "https://arc.io/arc-sw.js"
   status = 200
 
 [[redirects]]

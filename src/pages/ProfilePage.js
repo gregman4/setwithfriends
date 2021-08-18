@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Redirect } from "react-router-dom";
 
 import Container from "@material-ui/core/Container";
@@ -15,8 +15,10 @@ import ProfileName from "../components/ProfileName";
 import UserStatistics from "../components/UserStatistics";
 import ProfileGamesTable from "../components/ProfileGamesTable";
 import Subheading from "../components/Subheading";
-import useFirebaseRef from "../hooks/useFirebaseRef";
+import Loading from "../components/Loading";
+import firebase from "../firebase";
 import useFirebaseRefs from "../hooks/useFirebaseRefs";
+import useStats from "../hooks/useStats";
 import { computeState, hasHint, modes } from "../util";
 import LoadingPage from "./LoadingPage";
 
@@ -68,7 +70,24 @@ function ProfilePage({ match }) {
   const userId = match.params.id;
   const classes = useStyles();
 
-  const [games, loadingGames] = useFirebaseRef(`/userGames/${userId}`, true);
+  const [games, setGames] = useState(null);
+  useEffect(() => {
+    const query = firebase
+      .database()
+      .ref(`/userGames/${userId}`)
+      .orderByValue()
+      .limitToLast(50);
+    const update = (snapshot) => {
+      query.off("value", update);
+      setGames(snapshot.val() ?? {});
+    };
+    query.on("value", update);
+    return () => {
+      query.off("value", update);
+    };
+  }, [userId]);
+
+  const [stats, loadingStats] = useStats(userId);
   const [redirect, setRedirect] = useState(null);
   const [variant, setVariant] = useState("all");
   const [modeVariant, setModeVariant] = useState("normal");
@@ -77,21 +96,20 @@ function ProfilePage({ match }) {
     setRedirect(`/room/${gameId}`);
   };
 
-  const gameIds = useMemo(
-    () => (loadingGames ? [] : Object.keys(games || {})),
-    [loadingGames, games]
-  );
+  const gameIds = useMemo(() => (games ? Object.keys(games) : []), [games]);
   const [gameVals, loadingGameVals] = useFirebaseRefs(
-    useMemo(() => gameIds.map((gameId) => `games/${gameId}`), [gameIds])
+    useMemo(() => gameIds.map((gameId) => `games/${gameId}`), [gameIds]),
+    true
   );
   const [gameDataVals, loadingGameDataVals] = useFirebaseRefs(
-    useMemo(() => gameIds.map((gameId) => `gameData/${gameId}`), [gameIds])
+    useMemo(() => gameIds.map((gameId) => `gameData/${gameId}`), [gameIds]),
+    true
   );
 
   if (redirect) {
     return <Redirect push to={redirect} />;
   }
-  if (loadingGames) {
+  if (!games) {
     return <LoadingPage />;
   }
 
@@ -159,7 +177,11 @@ function ProfilePage({ match }) {
                 </Select>
               </div>
             </div>
-            <UserStatistics userId={userId} gamesData={gamesData} />
+            {loadingStats ? (
+              <Loading />
+            ) : (
+              <UserStatistics stats={stats[modeVariant]} variant={variant} />
+            )}
           </Grid>
         </Grid>
         <Subheading style={{ textAlign: "left" }}>Finished Games</Subheading>
